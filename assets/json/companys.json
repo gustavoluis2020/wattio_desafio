@@ -1,0 +1,48 @@
+
+
+
+{
+    "company": [
+        {
+            "name": "EnerFácil",
+            "minimum_value_month": 1000,
+            "maximum_value_month": 40000,
+            "discount": 0.2,
+            "form_of_hiring": "PJ",
+            "contract_plan": "Mensal",
+            "assessments": 3.8,
+            "payment_term": 15
+        },
+        {
+            "name": "EnerFácil2",
+            "minimum_value_month": 1000,
+            "maximum_value_month": 40000,
+            "discount": 0.2,
+            "form_of_hiring": "PF",
+            "contract_plan": "Trimestral",
+            "assessments": 3.8,
+            "payment_term": 30
+        },
+        {
+            "name": "EnerFácil3",
+            "minimum_value_month": 1000,
+            "maximum_value_month": 40000,
+            "discount": 0.2,
+            "form_of_hiring": "PJ",
+            "contract_plan": "Semestral",
+            "assessments": 3.8,
+            "payment_term": 15
+        },
+        {
+            "name": "EnerFácil4",
+            "minimum_value_month": 1000,
+            "maximum_value_month": 40000,
+            "discount": 0.2,
+            "form_of_hiring": "PJ",
+            "contract_plan": "Anual",
+            "assessments": 3.8,
+            "payment_term": 15
+        }
+        
+    ]
+}
