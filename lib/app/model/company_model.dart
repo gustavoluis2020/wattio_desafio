@@ -19,7 +19,6 @@ class CompanyModel {
     required this.paymentTerm,
   });
 
-  // Método para criar um objeto a partir de um mapa JSON
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
     return CompanyModel(
       name: json['name'],
@@ -33,7 +32,6 @@ class CompanyModel {
     );
   }
 
-  // Método para converter o objeto para um mapa JSON
   Map<String, dynamic> toJson() {
     return {
       'name': name,

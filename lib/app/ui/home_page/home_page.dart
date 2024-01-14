@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:wattio_desafio/app/constants/app_colors.dart';
+import 'package:wattio_desafio/app/ui/home_page/components/card_discount.dart';
 import 'package:wattio_desafio/app/ui/home_page/home_controller.dart';
 import 'package:wattio_desafio/app/utils/app_converters.dart';
 import 'package:wattio_desafio/app/utils/app_validations.dart';
@@ -246,12 +247,12 @@ class HomePage extends GetView<HomeController> {
                                     child: Card(
                                       surfaceTintColor: AppColors.white,
                                       shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(5),
-                                          side: BorderSide(
-                                              // ignore: unrelated_type_equality_checks
-                                              color: controller.selectedIndex == index
-                                                  ? Colors.black
-                                                  : Colors.transparent)),
+                                        borderRadius: BorderRadius.circular(5),
+                                        side: BorderSide(
+                                            // ignore: unrelated_type_equality_checks
+                                            color:
+                                                controller.selectedIndex == index ? Colors.black : Colors.transparent),
+                                      ),
                                       margin: const EdgeInsets.symmetric(vertical: 10),
                                       elevation: 5,
                                       child: Padding(
@@ -284,77 +285,16 @@ class HomePage extends GetView<HomeController> {
                       } else if (controller.discountAmount.value == 0.0) {
                         return const SizedBox.shrink();
                       } else {
-                        return Card(
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                          surfaceTintColor: AppColors.white,
-                          margin: const EdgeInsets.symmetric(vertical: 10),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('Resumo do seu desconto:',
-                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                                const SizedBox(height: 10),
-                                RichText(
-                                  textAlign: TextAlign.center,
-                                  text: TextSpan(
-                                      text: 'Sua economia no periodo do contrato será de até: ',
-                                      style: const TextStyle(color: Colors.black, fontSize: 16),
-                                      children: [
-                                        TextSpan(
-                                          text: AppConverters.doubleToRealString(controller.discountAmount.value),
-                                          style: const TextStyle(
-                                              color: AppColors.red, fontSize: 22, fontWeight: FontWeight.bold),
-                                        ),
-                                      ]),
-                                ),
-                                const SizedBox(height: 10),
-                                RichText(
-                                  textAlign: TextAlign.center,
-                                  text: TextSpan(
-                                      text: 'Valor do desconto mensal: ',
-                                      style: const TextStyle(color: Colors.black, fontSize: 16),
-                                      children: [
-                                        TextSpan(
-                                          text: AppConverters.doubleToRealString(controller.valueDescont.value),
-                                          style: const TextStyle(
-                                              color: AppColors.green, fontSize: 22, fontWeight: FontWeight.bold),
-                                        ),
-                                      ]),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  'Empresa: ${controller.nameCompany.value}',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  'Desconto de: ${AppConverters.formatarPorcentagem(controller.discount)}',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  'Quantidade de meses do contrato: ${controller.months.value}',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                const SizedBox(height: 10),
-                                Obx(() {
-                                  return AppButtonLoading(
-                                    width: Get.width,
-                                    onTap: () {
-                                      controller.validadeCompanyContract();
-                                    },
-                                    isLoading: controller.isLoadingCompanys.value,
-                                    text: 'Contratar',
-                                    color: AppColors.green,
-                                  );
-                                }),
-                                const SizedBox(height: 10),
-                              ],
-                            ),
-                          ),
+                        return CardDiscount(
+                          discountAmount: AppConverters.doubleToRealString(controller.discountAmount.value),
+                          valueDescont: AppConverters.doubleToRealString(controller.valueDescont.value),
+                          nameCompany: controller.nameCompany.value,
+                          discount: AppConverters.formatarPorcentagem(controller.discount),
+                          months: controller.months.value.toString(),
+                          isLoading: controller.isLoadingCompanys.value,
+                          onTap: () {
+                            controller.validadeCompanyContract();
+                          },
                         );
                       }
                     })

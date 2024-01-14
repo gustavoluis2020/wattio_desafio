@@ -9,10 +9,6 @@ class AppConverters {
     return valorFinal;
   }
 
-  static String normalizePhoneString(String phone) {
-    return phone.replaceAll(RegExp(r'[^0-9]'), '');
-  }
-
   static String formatarPorcentagem(double valor) {
     return NumberFormat.percentPattern().format(valor);
   }
