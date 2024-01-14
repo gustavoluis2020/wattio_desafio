@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:wattio_desafio/app/constants/app_colors.dart';
+import 'package:wattio_desafio/app/ui/home_page/components/card_companies.dart';
 import 'package:wattio_desafio/app/ui/home_page/components/card_discount.dart';
+import 'package:wattio_desafio/app/ui/home_page/components/card_home.dart';
+import 'package:wattio_desafio/app/ui/home_page/components/header_title.dart';
 import 'package:wattio_desafio/app/ui/home_page/home_controller.dart';
 import 'package:wattio_desafio/app/utils/app_converters.dart';
 import 'package:wattio_desafio/app/utils/app_validations.dart';
@@ -30,25 +33,9 @@ class HomePage extends GetView<HomeController> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      const Text('Watt-io', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-                      const SizedBox(width: 20),
-                      Image.asset('assets/images/energy.png', height: 50, width: 50),
-                      const SizedBox(width: 20),
-                      const Text('Energy', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-                    ]),
-                    const SizedBox(height: 20),
-                    const Text('Calcule sua economia baseado em seu consumo médio de energia elétrica.',
-                        textAlign: TextAlign.center, style: TextStyle(fontSize: 16)),
-                    const SizedBox(height: 20),
-                    const Text('Selecione a forma de contratação.',
-                        textAlign: TextAlign.center, style: TextStyle(fontSize: 16)),
+                    const HeaderTitle(),
                     Obx(() {
-                      return Card(
-                        elevation: 5,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                        surfaceTintColor: AppColors.white,
+                      return CardHome(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -80,10 +67,7 @@ class HomePage extends GetView<HomeController> {
                     const SizedBox(height: 20),
                     const Text('Selecione o tempo do contrato.',
                         textAlign: TextAlign.center, style: TextStyle(fontSize: 16)),
-                    Card(
-                      elevation: 5,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                      surfaceTintColor: AppColors.white,
+                    CardHome(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -148,10 +132,7 @@ class HomePage extends GetView<HomeController> {
                     const Text('Selecione o prazo de pagamento.',
                         textAlign: TextAlign.center, style: TextStyle(fontSize: 16)),
                     Obx(() {
-                      return Card(
-                        elevation: 5,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                        surfaceTintColor: AppColors.white,
+                      return CardHome(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -208,10 +189,10 @@ class HomePage extends GetView<HomeController> {
                       return AppButtonLoading(
                         width: Get.width,
                         onTap: () {
-                          controller.validadeCompanys();
+                          controller.validadeCompany();
                           FocusScope.of(context).unfocus();
                         },
-                        isLoading: controller.isLoadingCompanys.value,
+                        isLoading: controller.isLoadingCompany.value,
                         text: 'Buscar Ofertas',
                         color: AppColors.green,
                       );
@@ -220,7 +201,7 @@ class HomePage extends GetView<HomeController> {
                     Obx(() {
                       if (!controller.isLoaded.value) {
                         return const SizedBox.shrink();
-                      } else if (controller.isLoadingCompanys.value) {
+                      } else if (controller.isLoadingCompany.value) {
                         return AppShimmer(index: 2, height: 120, width: Get.width);
                       } else if (controller.filteredCompanies.isEmpty) {
                         return const Center(
@@ -248,30 +229,9 @@ class HomePage extends GetView<HomeController> {
                                       controller.nameCompany.value = company.name;
                                       controller.calculateValue();
                                     },
-                                    child: Card(
-                                      surfaceTintColor: AppColors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(5),
-                                        side: BorderSide(
-                                            color:
-                                                controller.selectedIndex == index ? Colors.black : Colors.transparent),
-                                      ),
-                                      margin: const EdgeInsets.symmetric(vertical: 10),
-                                      elevation: 5,
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text('Empresa: ${company.name}'),
-                                            Text('Desconto:  ${AppConverters.formatarPorcentagem(company.discount)}'),
-                                            Text('Forma de Contrato: ${company.formOfHiring}'),
-                                            Text('Tempo de Contrato: ${company.contractPlan}'),
-                                            Text('Avaliação: ${company.assessments.toString()}'),
-                                            Text('Prazo de pagamento: ${company.paymentTerm.toString()} dias'),
-                                          ],
-                                        ),
-                                      ),
+                                    child: CardCompanies(
+                                      company: company,
+                                      color: controller.selectedIndex == index ? Colors.black : Colors.transparent,
                                     ),
                                   );
                                 });
@@ -294,7 +254,7 @@ class HomePage extends GetView<HomeController> {
                           nameCompany: controller.nameCompany.value,
                           discount: AppConverters.formatarPorcentagem(controller.discount),
                           months: controller.months.value.toString(),
-                          isLoading: controller.isLoadingCompanys.value,
+                          isLoading: controller.isLoadingCompany.value,
                           onTap: () {
                             controller.validadeCompanyContract();
                           },

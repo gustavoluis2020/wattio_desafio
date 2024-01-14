@@ -12,7 +12,7 @@ class HomeController extends GetxController {
 
   GlobalKey<FormState> formKeyUserLogin = GlobalKey<FormState>();
 
-  RxBool isLoadingCompanys = false.obs;
+  RxBool isLoadingCompany = false.obs;
 
   List<CompanyModel> companies = [];
 
@@ -36,7 +36,7 @@ class HomeController extends GetxController {
   }
 
   /// validate get companys
-  void validadeCompanys() {
+  void validadeCompany() {
     double moneyValue = getDoubleValue(moneyValueController);
     if (formKeyUserLogin.currentState!.validate() &&
         moneyValue > 0.0 &&
@@ -120,7 +120,7 @@ class HomeController extends GetxController {
   RxBool isLoaded = false.obs;
   void filterCompanies() async {
     try {
-      isLoadingCompanys.value = true;
+      isLoadingCompany.value = true;
       await Future.delayed(const Duration(seconds: 2));
       double typedValue = getDoubleValue(moneyValueController);
 
@@ -139,9 +139,9 @@ class HomeController extends GetxController {
         formOfHiring: formOfHiring,
         paymentTerm: paymentTerm,
       );
-      isLoadingCompanys.value = false;
+      isLoadingCompany.value = false;
     } catch (e) {
-      isLoadingCompanys.value = false;
+      isLoadingCompany.value = false;
       debugPrint('Error company list $e');
     }
   }
@@ -213,10 +213,11 @@ class HomeController extends GetxController {
     months.value = 0;
     discountAmount.value = 0.0;
     selectedIndex.value = -1;
-    moneyValueController.clear();
+    moneyValueController.text = '';
     selectedFormOfHiring.value = '';
     selectedContractPlan.value = '';
     selectedPaymentTerm.value = 0;
+    isLoaded.value = false;
   }
 
   clearVariablesFilter() {
