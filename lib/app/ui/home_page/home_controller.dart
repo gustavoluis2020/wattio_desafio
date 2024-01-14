@@ -3,12 +3,16 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:wattio_desafio/app/constants/app_colors.dart';
 import 'package:wattio_desafio/app/model/company_model.dart';
+import 'package:wattio_desafio/app/widgets/app_dialog.dart';
 
 class HomeController extends GetxController {
   TextEditingController moneyValueController = TextEditingController();
 
-  RxBool isLoadingSaveMoney = false.obs;
+  GlobalKey<FormState> formKeyUserLogin = GlobalKey<FormState>();
+
+  RxBool isLoadingCompanys = false.obs;
 
   List<CompanyModel> companies = [];
 
@@ -37,12 +41,27 @@ class HomeController extends GetxController {
     super.onInit();
   }
 
-  void validadeValue() {
-    readJson().then((_) {
-      filterCompanies();
-    });
-    //filterCompanies();
-    // readJson();
+  void validadeCompanys() {
+    double moneyValue = getDoubleValue(moneyValueController);
+    if (formKeyUserLogin.currentState!.validate() &&
+        moneyValue > 0.0 &&
+        selectedFormOfHiring.value.isNotEmpty &&
+        selectedContractPlan.value.isNotEmpty &&
+        selectedPaymentTerm.value > 0) {
+      readJson().then((_) {
+        filterCompanies();
+      });
+      clearVariablesFilter();
+    } else {
+      Get.snackbar(
+        'Preencha todos os campos obrigatórios!',
+        '',
+        backgroundColor: AppColors.red,
+        colorText: AppColors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+    }
   }
 
   ///form_of_hiring
@@ -69,40 +88,6 @@ class HomeController extends GetxController {
     debugPrint(selectedPaymentTerm.value.toString());
   }
 
-  /// clean e convertion R$ to double
-  double getDoubleValue(TextEditingController? controller) {
-    try {
-      if (controller == null || controller.text.isEmpty) {
-        return 1.0;
-      } else {
-        String currentValue = controller.text;
-        String onlyDigits = currentValue.replaceAll(RegExp('[^0-9]'), '');
-        double doubleValue = double.parse(onlyDigits) / 100;
-        return doubleValue;
-      }
-    } catch (e) {
-      debugPrint('Erro ao converter o valor: $e');
-      return 0.0;
-    }
-  }
-
-  int getIntValue(TextEditingController? controller) {
-    try {
-      if (controller == null || controller.text.isEmpty) {
-        return 1;
-      } else {
-        String currentValue = controller.text;
-        String onlyDigits = currentValue.replaceAll(RegExp('[^0-9]'), '');
-        int intValue = int.parse(onlyDigits);
-        debugPrint(intValue.toString());
-        return intValue;
-      }
-    } catch (e) {
-      debugPrint('Erro ao converter o valor: $e');
-      return 0;
-    }
-  }
-
   List<CompanyModel> applyFilters({
     double? minValue,
     double? maxValue,
@@ -111,18 +96,6 @@ class HomeController extends GetxController {
     int? paymentTerm,
   }) {
     return companies.where((company) {
-      // // Filtro de valor mínimo
-      // if (minValue != null && company.minimumValueMonth < minValue) {
-      //   print('Valor mínimo não atendido: ${company.minimumValueMonth} < $minValue');
-      //   return false;
-      // }
-
-      // // Filtro de valor máximo
-      // if (maxValue != null && company.maximumValueMonth > maxValue) {
-      //   print('Valor máximo não atendido: ${company.maximumValueMonth} > $maxValue');
-      //   return false;
-      // }
-
       // Verificação adicional para o valor estar entre mínimo e máximo
       if (minValue != null &&
           maxValue != null &&
@@ -131,12 +104,6 @@ class HomeController extends GetxController {
             'Valor não está entre mínimo e máximo: ${company.minimumValueMonth} > $minValue OR ${company.maximumValueMonth} < $maxValue');
         return false;
       }
-
-      // Filtro de plano de contrato
-      // if (contractPlan != null && company.contractPlan != contractPlan) {
-      //   print('Plano de contrato não atendido: ${company.contractPlan} != $contractPlan');
-      //   return false;
-      // }
 
       // Filtro de prazo de pagamento
       if (paymentTerm != null && company.paymentTerm != paymentTerm) {
@@ -161,8 +128,10 @@ class HomeController extends GetxController {
   }
 
   RxList<CompanyModel> filteredCompanies = <CompanyModel>[].obs;
-  void filterCompanies() {
+  void filterCompanies() async {
     try {
+      isLoadingCompanys.value = true;
+      await Future.delayed(const Duration(seconds: 2));
       double typedValue = getDoubleValue(moneyValueController);
 
       double? minValue = typedValue;
@@ -180,10 +149,109 @@ class HomeController extends GetxController {
         formOfHiring: formOfHiring,
         paymentTerm: paymentTerm,
       );
-
-      print(filteredCompanies.length);
+      isLoadingCompanys.value = false;
     } catch (e) {
-      debugPrint('Erro ao filtrar as empresas: $e');
+      isLoadingCompanys.value = false;
+      debugPrint('Error company list $e');
+    }
+  }
+
+  RxInt selectedIndex = RxInt(-1);
+  double discount = 0.0;
+  String contractPlan = '';
+  RxDouble valueDescont = 0.0.obs;
+  RxString nameCompany = ''.obs;
+  RxInt months = 0.obs;
+  RxDouble discountAmount = 0.0.obs;
+
+  void calculateValue() async {
+    try {
+      isLoadingSaveContract.value = true;
+      await Future.delayed(const Duration(seconds: 2));
+      double moneyValue = getDoubleValue(moneyValueController);
+      months.value;
+      switch (contractPlan) {
+        case 'Mensal':
+          months.value = 12;
+          break;
+        case 'Trimestral':
+          months.value = 3;
+          break;
+        case 'Semestral':
+          months.value = 6;
+          break;
+        case 'Anual':
+          months.value = 12;
+          break;
+        default:
+          throw Exception('Plano de contrato inválido');
+      }
+
+      double total = moneyValue * months.value;
+      discountAmount.value = total * discount;
+      double discountedValue = discountAmount / months.value;
+      valueDescont.value = discountedValue;
+      isLoadingSaveContract.value = false;
+    } catch (e) {
+      isLoadingSaveContract.value = false;
+      debugPrint('Error calculate value: $e');
+    }
+  }
+
+  RxBool isLoadingSaveContract = false.obs;
+
+  void validadeCompanyContract() async {
+    clearVariables();
+    Get.dialog(
+      AppDialog(
+        onTap: () {
+          Get.back();
+        },
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  ///common methods
+
+  clearVariables() {
+    filteredCompanies.clear();
+    discount = 0.0;
+    contractPlan = '';
+    valueDescont.value = 0.0;
+    months.value = 0;
+    discountAmount.value = 0.0;
+    selectedIndex.value = -1;
+    moneyValueController.clear();
+    selectedFormOfHiring.value = '';
+    selectedContractPlan.value = '';
+    selectedPaymentTerm.value = 0;
+  }
+
+  clearVariablesFilter() {
+    filteredCompanies.clear();
+    discount = 0.0;
+    contractPlan = '';
+    valueDescont.value = 0.0;
+    months.value = 0;
+    discountAmount.value = 0.0;
+    selectedIndex.value = -1;
+  }
+
+  /// clean e convertion R$ to double
+  double getDoubleValue(TextEditingController? controller) {
+    try {
+      if (controller == null || controller.text.isEmpty) {
+        return 1.0;
+      } else {
+        String currentValue = controller.text;
+        String onlyDigits = currentValue.replaceAll(RegExp('[^0-9]'), '');
+        double doubleValue = double.parse(onlyDigits) / 100;
+        return doubleValue;
+      }
+    } catch (e) {
+      debugPrint('Error converting value: $e');
+      return 0.0;
     }
   }
 }
