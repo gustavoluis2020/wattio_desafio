@@ -1,3 +1,5 @@
+// ignore_for_file: unrelated_type_equality_checks
+
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -216,7 +218,9 @@ class HomePage extends GetView<HomeController> {
                     }),
                     const SizedBox(height: 20),
                     Obx(() {
-                      if (controller.isLoadingCompanys.value) {
+                      if (!controller.isLoaded.value) {
+                        return const SizedBox.shrink();
+                      } else if (controller.isLoadingCompanys.value) {
                         return AppShimmer(index: 2, height: 120, width: Get.width);
                       } else if (controller.filteredCompanies.isEmpty) {
                         return const Center(
@@ -249,7 +253,6 @@ class HomePage extends GetView<HomeController> {
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(5),
                                         side: BorderSide(
-                                            // ignore: unrelated_type_equality_checks
                                             color:
                                                 controller.selectedIndex == index ? Colors.black : Colors.transparent),
                                       ),

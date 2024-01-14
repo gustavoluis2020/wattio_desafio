@@ -16,6 +16,7 @@ class HomeController extends GetxController {
 
   List<CompanyModel> companies = [];
 
+  /// read json file companys
   Future<void> readJson() async {
     try {
       final String response = await rootBundle.loadString('assets/json/companys.json');
@@ -28,19 +29,13 @@ class HomeController extends GetxController {
         return CompanyModel.fromJson(json);
       }).toList();
 
-      // companies = companyListJson.map((json) => CompanyModel.fromJson(json)).toList();
       debugPrint(companies.length.toString());
     } catch (e) {
-      debugPrint('Erro ao ler o arquivo JSON: $e');
+      debugPrint('Error to read json file $e');
     }
   }
 
-  @override
-  void onInit() {
-    // readJson();
-    super.onInit();
-  }
-
+  /// validate get companys
   void validadeCompanys() {
     double moneyValue = getDoubleValue(moneyValueController);
     if (formKeyUserLogin.currentState!.validate() &&
@@ -51,6 +46,7 @@ class HomeController extends GetxController {
       readJson().then((_) {
         filterCompanies();
       });
+      isLoaded.value = true;
       clearVariablesFilter();
     } else {
       Get.snackbar(
@@ -88,6 +84,7 @@ class HomeController extends GetxController {
     debugPrint(selectedPaymentTerm.value.toString());
   }
 
+  /// apply filters in list companys
   List<CompanyModel> applyFilters({
     double? minValue,
     double? maxValue,
@@ -96,38 +93,31 @@ class HomeController extends GetxController {
     int? paymentTerm,
   }) {
     return companies.where((company) {
-      // Verificação adicional para o valor estar entre mínimo e máximo
       if (minValue != null &&
           maxValue != null &&
           (company.minimumValueMonth > minValue || company.maximumValueMonth < maxValue)) {
-        print(
-            'Valor não está entre mínimo e máximo: ${company.minimumValueMonth} > $minValue OR ${company.maximumValueMonth} < $maxValue');
         return false;
       }
 
-      // Filtro de prazo de pagamento
       if (paymentTerm != null && company.paymentTerm != paymentTerm) {
-        print('Prazo de pagamento não atendido: ${company.paymentTerm} != $paymentTerm');
         return false;
       }
 
-      // Filtro de forma de contratação
       if (formOfHiring != null && company.formOfHiring != formOfHiring) {
-        print('Forma de contratação não atendida: ${company.formOfHiring} != $formOfHiring');
         return false;
       }
 
       if (contractPlan != null && company.contractPlan != contractPlan) {
-        print('Plano de contrato não atendido: ${company.contractPlan} != $contractPlan');
         return false;
       }
 
-      // Se passou por todos os filtros, inclui a empresa na lista filtrada
       return true;
     }).toList();
   }
 
   RxList<CompanyModel> filteredCompanies = <CompanyModel>[].obs;
+
+  RxBool isLoaded = false.obs;
   void filterCompanies() async {
     try {
       isLoadingCompanys.value = true;
@@ -164,6 +154,7 @@ class HomeController extends GetxController {
   RxInt months = 0.obs;
   RxDouble discountAmount = 0.0.obs;
 
+  /// calculate value discount
   void calculateValue() async {
     try {
       isLoadingSaveContract.value = true;
